@@ -19,6 +19,8 @@ WIN_SIZE = (600, 600)
 SUB_DIVS = (4, 4, 30)
 SLICE_DIVS = (8, 8, 1)
 
+IMG_PATH = ("hiker.jpg", "chess.jpg")[1]
+
 def generate_torus_cloud(
 		n			= 10_000,
 		center		= np.array([0, 0, 0]),
@@ -491,11 +493,10 @@ class PointCloud:
 						continue
 				self.draw()
 
-
+'''
 from PIL import Image
-im = Image.open("dp_headphones.png")
-np_im = np.array(im)
-
+im = Image.open("hiker.jpg")
+np_im = np.array(im).mean(axis=2)
 w, h = np_im.shape
 s = 0.1
 
@@ -513,7 +514,35 @@ for x in range(w):
 
 p = PointCloud(pts)
 p.render2d_hook()
+'''
 
+from PIL import Image
+img_grayscale = np.array(Image.open(IMG_PATH)).mean(axis=2)
+img_grayscale_float = img_grayscale / np.max(img_grayscale)
+
+h, w = img_grayscale_float.shape
+print(img_grayscale_float.shape)
+d = max(w, h)
+scale = 100
+pts = []
+for y in range(h):
+	for x in range(w):
+		if random.uniform(0, 1) > 1:
+			continue
+		gray = img_grayscale_float[(h-1)-y][x]
+		pts.append((scale * (x - w/2) / d, scale * (0.5 - gray), scale * (y - h/2) / d))
+
+#NEW START
+from cloud_render import *
+app = MyApp()
+
+#pts = generate_torus_cloud(n=10_000, noise_st_dev=0.1)
+app.render_cloud(pts)
+
+#p = PointCloud(pts)
+#p.render2d_hook()
+
+app.run()
 
 
 
